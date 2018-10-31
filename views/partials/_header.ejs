@@ -1,5 +1,14 @@
 <!doctype html>
 <head>
-  <link rel="stylesheet" type="text/css" href="../../public/style.css">
+
 <title>Tinyapp!</title>
 </head>
+<body>
+  <% if (username) { %>
+  <h1><%= username %></h1>
+  <form method="POST" action="/logout"><button>Logout</button><br><br>
+  <% } else { %>
+  <form method="POST" action="/login"><input type="text" name="username"></input><button>Login</button></form><br>
+    <% }; %>
+
+</body>

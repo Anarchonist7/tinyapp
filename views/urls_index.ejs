@@ -5,8 +5,12 @@
 </head>
 <body>
     <!-- Add your EJS code here -->
-    <ul>
-  <% for (var url in urls) { %><li href='#'><%= urls[url] %></li><div display="block"><form method="POST" action="urls/<%= url %>/update"><button>Edit</button></form><form method="POST" action="/urls/<%= url %>/delete"><button>Delete</button></form></div>
+  <ul style="display: inline">
+  <% for (var url in urls) { %>
+
+  <li href='#'><%= urls[url] %></li><div display="block"><form style="display: inline" method="POST" action="urls/<%= url %>/update"><button>Edit</button></form>
+
+  <form style="display: inline" method="POST" action="/urls/<%= url %>/delete"><button>Delete</button></form></div>
 
 
 <% };                %>
