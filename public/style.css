@@ -1,0 +1,12 @@
+ .form-item.field.edit, .form-item.field.delete {
+   display: inline-block;
+   min-width: 48.8%;
+ }
+
+ .form-item.field.edit {
+   margin-right: 1.4%;
+ }
+
+ html {
+  color: red;
+ }
