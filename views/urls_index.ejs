@@ -6,8 +6,9 @@
 <body>
     <!-- Add your EJS code here -->
     <ul>
-  <% for (var url in urls) { %>
-  <li href='#'><%= urls[url] %>  </li>
+  <% for (var url in urls) { %><form method="POST" action="/urls/<%= url %>/delete"><li href='#'><%= urls[url] %></li><button>Delete</button></form>
+
+
 <% };                %>
 
 
