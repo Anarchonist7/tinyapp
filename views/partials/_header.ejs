@@ -5,10 +5,13 @@
 </head>
 <body>
   <% if (username) { %>
-  <h1><%= username %></h1>
-  <form method="POST" action="/logout"><button>Logout</button><br><br>
+  <h1><%= username.id %></h1>
+  <form method="POST" action="/logout"><button>Logout</button></form>
   <% } else { %>
-  <form method="POST" action="/login"><input type="text" name="username"></input><button>Login</button></form><br>
+  <a href="register">Register</a> |
+  <a href="login">Login</a>
     <% }; %>
+  <br>
+
 
 </body>

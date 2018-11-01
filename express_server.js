@@ -16,29 +16,46 @@ function generateRandomString() {
   console.log(randomString);
   return randomString;
 }
-
+//databases
 var urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
 };
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.get("/urls", (req, res) => {
-  let templateVars = { username: req.cookies["username"], urls: urlDatabase };
+  let templateVars = { username: users[req.cookies["user_id"]],
+    urls: urlDatabase
+  };
+
 
   res.render("urls_index", templateVars);
 
 });
 
 app.get("/urls/new", (req, res) => {
-  var templateVars = { username: req.cookies["username"], something: 'im a placeholder!'};
+  let templateVars = { username: users[req.cookies["user_id"]],
+    urls: urlDatabase
+  };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { username: req.cookies["username"], shortURL: req.params.id,
+  let templateVars = { username: users[req.cookies["user_id"]], shortURL: req.params.id,
     lurl: urlDatabase[req.params.id] };
 
   res.render("urls_show", templateVars);
@@ -55,16 +72,75 @@ app.get('/urls.json', (req, res) => {
 app.get('/hello', (req, res) => {
   res.send('<html><body>Hello <b>BRAVE WARRIOR</b></body></html>\n');
 });
+//registration!!!!!!!!!!!!!!!!!!!!!!!!!!!!YAH!
+app.get('/register', (req, res) => {
+  let templateVars = { username: users[req.cookies["user_id"]]};
+  res.render('registration_page', templateVars);
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.post('/register', (req, res) => {
+  var email = req.body.email;
+  var password = req.body.password;
+
+  for (user in users) {
+    //console.log('email : ', email);
+    //console.log('user email :', users[user].email);
+    if (email === users[user].email) {
+      //console.log('match');
+      res.status(400).send('Your email is already registered, go back and try again');
+    }
+  }
+
+  if (email === '' || password === '') {
+    res.status(400).send('Your email/password is empty, go back and try again');
+  } else {
+
+    var userKey = generateRandomString();
+    console.log('circuit tripped!');
+    users[userKey] = { id: userKey, email,
+      password};
+    console.log(users);
+    res.cookie('user_id', userKey);
+    res.redirect('/urls');
+  }
+
+});
 //login feature
 app.post('/login', (req, res) => {
+  var myMail = req.body.email;
+  var pWord = req.body.password;
+  var truMail = null;
+  var truPass = null;
+  for (var usr in users) {
 
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
+    if (myMail === users[usr].email) {
+      truMail = users[usr].email;
+      if (pWord === users[usr].password) {
+        res.cookie('user_id', users[usr].id);
+        console.log('we did it!');
+        truPass = users[usr].password;
+      }
+    }
+  }
+
+  if (!truMail) {
+    res.status(403).send('Email not found, go back and try again.');
+  }
+
+  if (!truPass) {
+    res.status(403).send('Password does not match, go back and try again');
+  }
+
+  res.redirect('/');
 });
 
 //logout feature
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 //delete feature
@@ -78,8 +154,8 @@ app.post('/urls/:id/update', (req, res) => {
 });
 
 app.post('/urls/:id', (req, res) => {
-  let templateVars = { username: req.cookies["username"]};
-  console.log(req.body.urlName);
+  let templateVars = { username: users[req.cookies["user_id"]]};
+  //console.log(req.body.urlName);
   urlDatabase[req.params.id] = req.body.urlName;
   res.redirect('/urls', templateVars);
 
@@ -101,3 +177,6 @@ app.get("/u/:shortURL", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+//helper functions
+
