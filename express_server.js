@@ -3,6 +3,7 @@ var cookieParser = require('cookie-parser');
 var app = express();
 var PORT = 8080;
 var cookie;
+var currentUser;
 
 app.set('view engine', 'ejs');
 app.use(cookieParser());
@@ -51,7 +52,12 @@ app.get("/urls/new", (req, res) => {
   let templateVars = { username: users[req.cookies["user_id"]],
     urls: urlDatabase
   };
-  res.render("urls_new", templateVars);
+
+  if (!currentUser) {
+    res.render('login');
+  } else {
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -98,7 +104,7 @@ app.post('/register', (req, res) => {
   if (email === '' || password === '') {
     res.status(400).send('Your email/password is empty, go back and try again');
   } else {
-
+    currentUser = true;
     var userKey = generateRandomString();
     console.log('circuit tripped!');
     users[userKey] = { id: userKey, email,
@@ -121,7 +127,8 @@ app.post('/login', (req, res) => {
       truMail = users[usr].email;
       if (pWord === users[usr].password) {
         res.cookie('user_id', users[usr].id);
-        console.log('we did it!');
+        currentUser = true;
+        console.log('Successful login');
         truPass = users[usr].password;
       }
     }
@@ -142,6 +149,7 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
+  currentUser = false;
 });
 //delete feature
 app.post('/urls/:id/delete', (req, res) => {
