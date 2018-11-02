@@ -5,11 +5,11 @@
 </head>
 <body>
   <% if (username) { %>
-  <h1><%= username.id %></h1>
+  <h1><%= username.email %></h1>
   <form method="POST" action="/logout"><button>Logout</button></form>
   <% } else { %>
-  <a href="register">Register</a> |
-  <a href="login">Login</a>
+  <a href="/register">Register</a> |
+  <a href="/login">Login</a>
     <% }; %>
   <br>
 
