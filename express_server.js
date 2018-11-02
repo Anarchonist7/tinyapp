@@ -1,10 +1,12 @@
 var express = require('express');
 var cookieParser = require('cookie-parser');
+
 var app = express();
 var PORT = 8080;
 var cookie;
 var currentUser;
 var loggedUser = false;
+const bcrypt = require('bcrypt');
 
 app.set('view engine', 'ejs');
 app.use(cookieParser());
@@ -101,14 +103,14 @@ app.get("/urls/:id", (req, res) => {
   console.log('req body', req.body);
   let templateVars = { username: users[req.cookies["user_id"]], shortURL: req.params.id,
     lurl: urlDatabase[req.params.id].link};
-    console.log('LURL:', urlDatabase[req.params.id].link);
-    console.log('url database: ', urlDatabase);
+    //console.log('LURL:', urlDatabase[req.params.id].link);
+    //console.log('url database: ', urlDatabase);
 //console.log('this is the short url: ', templateVars[shortURL]);
   res.render("urls_show", templateVars);
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello');
+  res.send("<h1>Hello</h1><br><a href='/urls/new'>Make a new url</a>");
 });
 
 app.get('/urls.json', (req, res) => {
@@ -130,9 +132,9 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  var email = req.body.email;
-  var password = req.body.password;
-
+  const email = req.body.email;
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   for (user in users) {
     //console.log('email : ', email);
     //console.log('user email :', users[user].email);
@@ -148,10 +150,10 @@ app.post('/register', (req, res) => {
     loggedUser = true;
     currentUser = req.cookies.user_id;
     var userKey = generateRandomString();
-    console.log('circuit tripped!');
+    //console.log('circuit tripped!');
     users[userKey] = { id: userKey, email,
-      password};
-    console.log(users);
+      password: hashedPassword};
+    //console.log(users);
     res.cookie('user_id', userKey);
     res.redirect('/urls');
   }
@@ -163,11 +165,14 @@ app.post('/login', (req, res) => {
   var pWord = req.body.password;
   var truMail = null;
   var truPass = null;
-  for (var usr in users) {
 
+
+  for (var usr in users) {
     if (myMail === users[usr].email) {
+      let pFind = users[usr];
       truMail = users[usr].email;
-      if (pWord === users[usr].password) {
+      if (bcrypt.compareSync(pWord, pFind.password)) {
+      // if (pWord === users[usr].password) {
         res.cookie('user_id', users[usr].id);
         currentUser = req.cookies.user_id;
         console.log('Successful login');
@@ -189,6 +194,7 @@ app.post('/login', (req, res) => {
 
 //logout feature
 app.post('/logout', (req, res) => {
+  console.log('password im comparing to: ', users);
   loggedUser = false;
   res.clearCookie('user_id');
   res.redirect('/urls');
