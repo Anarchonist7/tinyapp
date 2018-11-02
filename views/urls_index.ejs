@@ -8,12 +8,11 @@
   <ul style="display: inline">
   <% for (var url in urls) { %>
 
-  <li href='#'><%= urls[url].link %></li><div display="block"><form style="display: inline" method="POST" action="urls/<%= url %>/update"><button>Edit</button></form>
+  <li href='#'><%= urls[url] %></li><div display="block"><form style="display: inline" method="POST" action="urls/<%= url %>/update"><button>Edit</button></form>
 
   <form style="display: inline" method="POST" action="/urls/<%= url %>/delete"><button>Delete</button></form></div>
-
-
 <% };                %>
+<a href='urls/new'><h2>Create a new url!</h2></a>
 
 
 </ul>

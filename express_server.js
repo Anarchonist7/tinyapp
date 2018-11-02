@@ -45,10 +45,31 @@ const users = {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+
+//helper functions
+
+function urlsForUser(id) {
+  console.log("id we get", id);
+  console.log("url database ", urlDatabase);
+  var finito = {};
+  for (var key in urlDatabase) {
+    console.log('comparer :', urlDatabase[key].userID);
+    console.log('ID', id);
+    if (id === urlDatabase[key].userID) {
+      console.log('im activated!');
+      finito[key] = urlDatabase[key].link;
+      console.log('the current user is : ' + currentUser);
+    }
+  }
+
+  console.log('my object :', finito);
+  return finito;
+}
+
 app.get("/urls", (req, res) => {
 
   var filtered = urlsForUser(req.cookies.user_id);
-
+  console.log('these are my filtered urls: ', filtered);
   let templateVars = { username: users[req.cookies["user_id"]],
     urls: filtered
   };
@@ -76,9 +97,10 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
+  console.log('req body', req.body);
   let templateVars = { username: users[req.cookies["user_id"]], shortURL: req.params.id,
-    lurl: urlDatabase[req.params.id]['link'] };
-  //console.log('hellooo :', urlDatabase);
+    lurl: urlDatabase[req.params.id].link};
+//console.log('this is the short url: ', templateVars[shortURL]);
   res.render("urls_show", templateVars);
 });
 
@@ -177,13 +199,13 @@ app.post('/urls/:id/delete', (req, res) => {
   //   userID: '435623'
   // }
 
-  console.log("cookie ",req.cookies.user_id);
-  console.log("params ",req.params.id);
-  console.log(urlDatabase[req.params.id]);
+  // console.log("cookie ",req.cookies.user_id);
+  // console.log("params ",req.params.id);
+  // console.log(urlDatabase[req.params.id]);
 
   // console.log('Important info :', req.cookies.user_id, 'comparer :', urlDatabase[req.params.id]['userID']);
 
-  if (req.cookies.user_id === urlDatabase[req.params.id].username.id) {
+  if (req.cookies.user_id === urlDatabase[req.params.id].userID) {
     console.log("condition matched for the delete");
     delete urlDatabase[req.params.id];
     res.redirect('/urls');
@@ -194,13 +216,15 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 //update feature
 app.post('/urls/:id/update', (req, res) => {
-
+  console.log('update body: ', req.body);
+  urlDatabase[req.params.id].link = req.body.urlName;
+  //res.render('/urls/' + req.params.id + '/update');
   res.redirect('/urls/' + req.params.id);
 });
 
 app.post('/urls/:id', (req, res) => {
   let templateVars = { username: users[req.cookies["user_id"]]};
-  if (currentUser === urlDatabase[req.params.id]['userID']) {
+  if (req.cookies.user_id === urlDatabase[req.params.id].username.id) {
     urlDatabase[req.params.id] = {link: req.body.urlName};
     res.redirect('/urls');
   } else {
@@ -212,7 +236,9 @@ app.post('/urls/:id', (req, res) => {
 
 app.post("/urls", (req, res) => {
   var stringo = generateRandomString();
-  urlDatabase[stringo] = {'link': req.body.longURL, username: users[req.cookies["user_id"]]};
+  console.log('This is the long url that didnt show :', req.body.longURL);
+  urlDatabase[stringo] = {'link': req.body.longURL, userID: req.cookies.user_id};///!!!!
+  console.log('whatever goes in userID: ' + req.cookies.user_id);
   //console.log(urlDatabase[stringo]['link']);
   //urlDatabase[stringo]['link'] = req.body.longURL;
   //console.log(urlDatabase[stringo]['link']);
@@ -232,19 +258,4 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-//helper functions
-
-function urlsForUser(id) {
-
-  var finito = {};
-  for (var key in urlDatabase) {
-    if (id === urlDatabase[key].userID) {
-      console.log('im activated!');
-      finito[key] = urlDatabase[key].link;
-    }
-  }
-
-  console.log('my object :', finito);
-  return finito;
-}
 
