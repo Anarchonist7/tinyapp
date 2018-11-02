@@ -70,6 +70,7 @@ app.get("/urls", (req, res) => {
 
   var filtered = urlsForUser(req.cookies.user_id);
   console.log('these are my filtered urls: ', filtered);
+  console.log('this is my url database: ', urlDatabase);
   let templateVars = { username: users[req.cookies["user_id"]],
     urls: filtered
   };
@@ -100,6 +101,8 @@ app.get("/urls/:id", (req, res) => {
   console.log('req body', req.body);
   let templateVars = { username: users[req.cookies["user_id"]], shortURL: req.params.id,
     lurl: urlDatabase[req.params.id].link};
+    console.log('LURL:', urlDatabase[req.params.id].link);
+    console.log('url database: ', urlDatabase);
 //console.log('this is the short url: ', templateVars[shortURL]);
   res.render("urls_show", templateVars);
 });
@@ -223,8 +226,9 @@ app.post('/urls/:id/update', (req, res) => {
 });
 
 app.post('/urls/:id', (req, res) => {
+  console.log('req.params.id :', req.params.id);
   let templateVars = { username: users[req.cookies["user_id"]]};
-  if (req.cookies.user_id === urlDatabase[req.params.id].username.id) {
+  if (req.cookies.user_id === urlDatabase[req.params.id].userID) {
     urlDatabase[req.params.id] = {link: req.body.urlName};
     res.redirect('/urls');
   } else {
