@@ -86,7 +86,8 @@ app.get("/urls", (req, res) => {
   if (loggedUser) {
     res.render("urls_index", templateVars);
   } else {
-    res.redirect('/login');
+    // res.redirect(403, "Looks like somebody isn't logged in....");
+    res.status(403).send("Looks like somebody isn't logged in...");
   }
 });
 
@@ -96,19 +97,34 @@ app.get("/urls/new", (req, res) => {
     urls: urlDatabase
   };
 
-  if (!loggedUser) {
-    res.render('login');
-  } else {
+  if (loggedUser) {
     res.render("urls_new", templateVars);
+  } else {
+    res.render('login');
+
   }
 });
 
 app.get("/urls/:id", (req, res) => {
-  console.log('req body', req.body);
+  console.log('comparer',urlDatabase);
+  console.log('id:',req.params.id)
   let templateVars = { username: users[req.session["user_id"]], shortURL: req.params.id,
     lurl: urlDatabase[req.params.id].link};
-
-  res.render("urls_show", templateVars);
+  let exists = false;
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].link == urlDatabase[req.params.id].link) {
+      exists = 'owned';
+    }
+  }
+  if (!exists) {
+    res.status(404).send('Url does not exist');
+  } else if (!loggedUser) {
+    res.status(403).send("Hey! You aren't logged in!");
+  } else if (loggedUser && exists !== 'owned') {
+    res.status(403).send("You don't own this link");
+  } else {
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.get('/', (req, res) => {
@@ -135,8 +151,11 @@ app.get('/register', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  loggedUser = true;
-  res.render('login');
+  if (loggedUser) {
+    res.redirect('/urls');
+  } else {
+    res.render('login');
+  }
 });
 
 app.post('/register', (req, res) => {
@@ -172,6 +191,7 @@ app.post('/login', (req, res) => {
   var pWord = req.body.password;
   var truMail = null;
   var truPass = null;
+  loggedUser = true;
 
   for (var usr in users) {
     if (myMail === users[usr].email) {
@@ -204,7 +224,7 @@ app.post('/logout', (req, res) => {
   console.log('password im comparing to: ', users);
   loggedUser = false;
   req.session.user_id = null;
-  res.redirect('/urls');
+  res.redirect('/');
   currentUser = null;
 });
 //delete feature
@@ -215,7 +235,7 @@ app.post('/urls/:id/delete', (req, res) => {
     delete urlDatabase[req.params.id];
     res.redirect('/urls');
   } else {
-    res.send('These are not your links! Release the hounds!');
+    res.status(401).send('Incorrect password, go back and try again');
   }
 });
 //update feature
@@ -233,7 +253,7 @@ app.post('/urls/:id', (req, res) => {
     urlDatabase[req.params.id] = {link: req.body.urlName};
     res.redirect('/urls');
   } else {
-    res.send('These are not your urls to edit!');
+    res.status(403).send('ACCESS DENIED!');
   }
 });
 
@@ -242,14 +262,30 @@ app.post("/urls", (req, res) => {
   console.log('This is the long url that didnt show :', req.body.longURL);
   urlDatabase[stringo] = {'link': req.body.longURL, userID: req.session.user_id};///!!!!
   console.log('whatever goes in userID: ' + req.session.user_id);
-
-  res.redirect('http://localhost:8080/urls/' + stringo);
+  if (!loggedUser) {
+    res.status(403).send('Log yourself in or get lost buddai!');
+  } else {
+    res.redirect('http://localhost:8080/urls/' + stringo);
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  let proper = false;
   console.log('Redirect stuff: ', req.params.shortURL);
-  let longURL = urlDatabase[req.params.shortURL].link;
-  res.redirect(longURL);
+
+  for (let url in urlDatabase) {
+    console.log('compare1: ', urlDatabase[url].link);
+    console.log('compare2: ', urlDatabase[req.params.shortURL].link);
+    if (urlDatabase[url].link == urlDatabase[req.params.shortURL].link) {
+      proper = true;
+    }
+  }
+  if (proper) {
+    let longURL = urlDatabase[req.params.shortURL].link;
+    res.redirect(longURL);
+  } else {
+    res.status(404).send('This url does not exist...leave this place');
+  }
 });
 
 app.listen(PORT, () => {
