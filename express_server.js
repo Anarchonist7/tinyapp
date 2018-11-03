@@ -128,7 +128,7 @@ app.get('/hello', (req, res) => {
 //registration!!!!!!!!!!!!!!!!!!!!!!!!!!!!YAH!
 app.get('/register', (req, res) => {
   let templateVars = { username: users[req.session.user_id]};
-  console.log(templateVars);
+
   if (loggedUser) {
     res.status(403).send('You already logged in...no more registration for you!');
   } else {
@@ -164,7 +164,7 @@ app.post('/register', (req, res) => {
     userKey = generateRandomString();
     req.session.user_id = userKey;
     currentUser = req.session.user_id;
-    //console.log('circuit tripped!');
+
     users[userKey] = { id: userKey, email,
       password: hashedPassword};
 
@@ -186,7 +186,7 @@ app.post('/login', (req, res) => {
       if (bcrypt.compareSync(pWord, pFind.password)) {
         req.session.user_id = userKey;
         currentUser = req.session.user_id;
-        console.log('Successful login');
+
         truPass = users[usr].password;
       }
     }
@@ -222,7 +222,7 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 //update feature
 app.post('/urls/:id/update', (req, res) => {
-  console.log('update body: ', req.body);
+
   urlDatabase[req.params.id].link = req.body.urlName;
   res.redirect('/urls/' + req.params.id);
 });
