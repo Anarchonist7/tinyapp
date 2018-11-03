@@ -143,21 +143,23 @@ app.get('/login', (req, res) => {
     res.render('login');
   }
 });
-
+//registration feature
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
+  let validMail = true;
   for (user in users) {
 
     if (email === users[user].email) {
-
-      res.status(400).send('Your email is already registered, go back and try again');
+      validMail = false;
     }
   }
 
   if (email === '' || password === '') {
     res.status(400).send('Your email/password is empty, go back and try again');
+  } else if (validMail === false) {
+    res.status(400).send('Your email is already registered, go back and try again');
   } else {
     loggedUser = true;
 
@@ -177,7 +179,6 @@ app.post('/login', (req, res) => {
   var pWord = req.body.password;
   var truMail = null;
   var truPass = null;
-  loggedUser = true;
 
   for (var usr in users) {
     if (myMail === users[usr].email) {
@@ -186,7 +187,7 @@ app.post('/login', (req, res) => {
       if (bcrypt.compareSync(pWord, pFind.password)) {
         req.session.user_id = userKey;
         currentUser = req.session.user_id;
-
+        loggedUser = true;
         truPass = users[usr].password;
       }
     }
@@ -194,13 +195,11 @@ app.post('/login', (req, res) => {
 
   if (!truMail) {
     res.status(403).send('Email not found, go back and try again.');
-  }
-
-  if (!truPass) {
+  } else if (!truPass) {
     res.status(403).send('Password does not match, go back and try again');
+  } else {
+    res.redirect('/');
   }
-
-  res.redirect('/');
 });
 
 //logout feature
@@ -240,7 +239,7 @@ app.post('/urls/:id', (req, res) => {
     res.status(403).send('ACCESS DENIED!');
   }
 });
-
+//adds a new link with shortURL
 app.post("/urls", (req, res) => {
 
   var stringo = generateRandomString();
