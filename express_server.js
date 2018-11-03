@@ -53,7 +53,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 function urlsForUser(id) {
   var finito = {};
   for (var key in urlDatabase) {
-
     if (id === urlDatabase[key].userID) {
       finito[key] = urlDatabase[key].link;
     }
@@ -94,6 +93,7 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = { username: users[req.session["user_id"]], shortURL: req.params.id,
     lurl: urlDatabase[req.params.id].link};
   let exists = false;
+
   for (let url in urlDatabase) {
     if (urlDatabase[url].link == urlDatabase[req.params.id].link) {
       exists = 'owned';
@@ -149,6 +149,7 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
   let validMail = true;
+
   for (user in users) {
 
     if (email === users[user].email) {
@@ -162,7 +163,6 @@ app.post('/register', (req, res) => {
     res.status(400).send('Your email is already registered, go back and try again');
   } else {
     loggedUser = true;
-
     userKey = generateRandomString();
     req.session.user_id = userKey;
     currentUser = req.session.user_id;

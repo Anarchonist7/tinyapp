@@ -4,7 +4,6 @@
   <% include ./partials/_header %>
 </head>
 <body>
-    <!-- Add your EJS code here -->
   <ul style="display: inline">
   <% for (var url in urls) { %>
 
@@ -13,8 +12,6 @@
   <form style="display: inline" method="POST" action="/urls/<%= url %>/delete"><button>Delete</button></form></div>
 <% };                %>
 <a href='urls/new'><h2>Create a new url!</h2></a>
-
-
 </ul>
 </body>
 </html>
