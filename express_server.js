@@ -1,14 +1,13 @@
-var express = require('express');
-var cookieSession = require('cookie-session');
-var app = express();
+const express = require('express');
+const cookieSession = require('cookie-session');
+const app = express();
 
 app.use(cookieSession({
   name: 'session',
   keys: ['Keyoooo!']
 }));
 
-var PORT = 8080;
-var currentUser;
+const PORT = 8080;
 var loggedUser = false;
 var userKey;
 const bcrypt = require('bcrypt');
@@ -24,7 +23,7 @@ function generateRandomString() {
   return randomString;
 }
 //databases
-var urlDatabase = {
+const urlDatabase = {
   'b2xVn2': {
     link: 'http://www.lighthouselabs.ca',
     userID: '453754'
@@ -51,18 +50,18 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 //Creates a new object of urls that belong to the logged in user
 function urlsForUser(id) {
-  var finito = {};
-  for (var key in urlDatabase) {
+  let finito = {};
+  for (let key in urlDatabase) {
     if (id === urlDatabase[key].userID) {
       finito[key] = urlDatabase[key].link;
     }
   }
   return finito;
 }
-
+//shows users a list of their urls
 app.get("/urls", (req, res) => {
 
-  var filtered = urlsForUser(req.session.user_id);
+  let filtered = urlsForUser(req.session.user_id);
 
   let templateVars = { username: users[req.session["user_id"]],
     urls: filtered
@@ -74,7 +73,7 @@ app.get("/urls", (req, res) => {
     res.status(403).send("Looks like somebody isn't logged in...");
   }
 });
-
+//shows users a page where they can create a new url
 app.get("/urls/new", (req, res) => {
 
   let templateVars = { username: users[req.session["user_id"]],
@@ -87,7 +86,7 @@ app.get("/urls/new", (req, res) => {
     res.redirect('/login');
   }
 });
-
+//shows users the selected url
 app.get("/urls/:id", (req, res) => {
 
   let templateVars = { username: users[req.session["user_id"]], shortURL: req.params.id,
@@ -95,7 +94,7 @@ app.get("/urls/:id", (req, res) => {
   let exists = false;
 
   for (let url in urlDatabase) {
-    if (urlDatabase[url].link == urlDatabase[req.params.id].link) {
+    if (urlDatabase[url].link === urlDatabase[req.params.id].link) {
       exists = 'owned';
     }
   }
@@ -109,7 +108,7 @@ app.get("/urls/:id", (req, res) => {
     res.render("urls_show", templateVars);
   }
 });
-
+//determines if user is logged in and sends them to the appropriate page
 app.get('/', (req, res) => {
   if (loggedUser) {
     res.redirect('/urls');
@@ -121,7 +120,7 @@ app.get('/', (req, res) => {
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
-
+//an easter egg of sorts...
 app.get('/hello', (req, res) => {
   res.send('<html><body>Hello <b>BRAVE WARRIOR</b></body></html>\n');
 });
@@ -135,7 +134,7 @@ app.get('/register', (req, res) => {
     res.render('registration_page', templateVars);
   }
 });
-
+//shows the login page
 app.get('/login', (req, res) => {
   if (loggedUser) {
     res.redirect('/urls');
@@ -165,7 +164,6 @@ app.post('/register', (req, res) => {
     loggedUser = true;
     userKey = generateRandomString();
     req.session.user_id = userKey;
-    currentUser = req.session.user_id;
 
     users[userKey] = { id: userKey, email,
       password: hashedPassword};
@@ -180,13 +178,12 @@ app.post('/login', (req, res) => {
   var truMail = null;
   var truPass = null;
 
-  for (var usr in users) {
+  for (let usr in users) {
     if (myMail === users[usr].email) {
       let pFind = users[usr];
       truMail = users[usr].email;
       if (bcrypt.compareSync(pWord, pFind.password)) {
         req.session.user_id = userKey;
-        currentUser = req.session.user_id;
         loggedUser = true;
         truPass = users[usr].password;
       }
@@ -207,7 +204,6 @@ app.post('/logout', (req, res) => {
   loggedUser = false;
   req.session.user_id = null;
   res.redirect('/');
-  currentUser = null;
 });
 //delete feature
 app.post('/urls/:id/delete', (req, res) => {
@@ -251,15 +247,10 @@ app.post("/urls", (req, res) => {
     res.redirect('http://localhost:8080/urls/' + stringo);
   }
 });
-
+//takes user to the desired url using our generated 'shortURL'
 app.get("/u/:shortURL", (req, res) => {
 
-  let proper = false;
-
   if (urlDatabase[req.params.shortURL]) {
-    proper = true;
-  }
-  if (proper) {
     let longURL = urlDatabase[req.params.shortURL].link;
     res.redirect(longURL);
   } else {
